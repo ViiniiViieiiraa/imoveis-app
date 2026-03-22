@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Imovel {
+  id            Int      @id @default(autoincrement())
+  nome          String
+  endereco      String
+  bairro        String?
+  cidade        String
+  estado        String   @default("SP")
+  cep           String?
+  tipo          String   @default("residencial")
+  valor_imovel  Decimal?
+  observacoes   String?
+  criado_em     DateTime @default(now())
+  atualizado_em DateTime @updatedAt
+
+  unidades Unidade[]
+  despesas Despesa[]
+}
+
+model Unidade {
+  id             Int      @id @default(autoincrement())
+  imovel_id      Int
+  identificacao  String
+  tipo           String   @default("apartamento")
+  area_m2        Decimal?
+  valor_aluguel  Decimal
+  dia_vencimento Int
+  status         String   @default("vaga")
+  observacoes    String?
+  criado_em      DateTime @default(now())
+  atualizado_em  DateTime @updatedAt
+
+  imovel   Imovel    @relation(fields: [imovel_id], references: [id])
+  contratos Contrato[]
+  despesas  Despesa[]
+}
+
+model Inquilino {
+  id            Int      @id @default(autoincrement())
+  nome          String
+  cpf_cnpj      String?  @unique
+  telefone      String?
+  email         String?
+  tipo_pessoa   String   @default("fisica")
+  observacoes   String?
+  criado_em     DateTime @default(now())
+  atualizado_em DateTime @updatedAt
+
+  contratos Contrato[]
+}
+
+model Contrato {
+  id               Int       @id @default(autoincrement())
+  unidade_id       Int
+  inquilino_id     Int
+  data_inicio      DateTime
+  data_fim         DateTime?
+  valor_aluguel    Decimal
+  dia_vencimento   Int
+  ultimo_reajuste  DateTime?
+  proximo_reajuste DateTime
+  status           String    @default("ativo")
+  observacoes      String?
+  criado_em        DateTime  @default(now())
+  atualizado_em    DateTime  @updatedAt
+
+  unidade             Unidade            @relation(fields: [unidade_id], references: [id])
+  inquilino           Inquilino          @relation(fields: [inquilino_id], references: [id])
+  pagamentos          Pagamento[]
+  historico_reajustes HistoricoReajuste[]
+}
+
+model HistoricoReajuste {
+  id             Int      @id @default(autoincrement())
+  contrato_id    Int
+  data_reajuste  DateTime
+  valor_anterior Decimal
+  valor_novo     Decimal
+  percentual     Decimal
+  observacoes    String?
+  criado_em      DateTime @default(now())
+
+  contrato Contrato @relation(fields: [contrato_id], references: [id])
+}
+
+model Pagamento {
+  id              Int       @id @default(autoincrement())
+  contrato_id     Int
+  mes_referencia  Int
+  ano_referencia  Int
+  valor_previsto  Decimal
+  valor_pago      Decimal?
+  data_vencimento DateTime
+  data_pagamento  DateTime?
+  status          String    @default("pendente")
+  observacoes     String?
+  criado_em       DateTime  @default(now())
+  atualizado_em   DateTime  @updatedAt
+
+  contrato Contrato @relation(fields: [contrato_id], references: [id])
+
+  @@unique([contrato_id, mes_referencia, ano_referencia])
+}
+
+model Despesa {
+  id            Int      @id @default(autoincrement())
+  imovel_id     Int?
+  unidade_id    Int?
+  descricao     String
+  categoria     String
+  tipo          String   @default("avulsa")
+  recorrencia   String?
+  valor         Decimal
+  data_despesa  DateTime
+  observacoes   String?
+  criado_em     DateTime @default(now())
+  atualizado_em DateTime @updatedAt
+
+  imovel  Imovel?  @relation(fields: [imovel_id], references: [id])
+  unidade Unidade? @relation(fields: [unidade_id], references: [id])
+}

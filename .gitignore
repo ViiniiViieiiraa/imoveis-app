@@ -1,0 +1,7 @@
+node_modules/
+dist/
+data/imoveis.db
+data/imoveis.db-journal
+data/imoveis.db-shm
+data/imoveis.db-wal
+.env

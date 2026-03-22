@@ -1,0 +1,112 @@
+<div class="space-y-6">
+
+  <!-- Cards de métricas -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+    <div class="metric-card">
+      <p class="metric-label">Imóveis</p>
+      <p class="metric-value">{{totalImoveis}}</p>
+    </div>
+
+    <div class="metric-card">
+      <p class="metric-label">Unidades</p>
+      <p class="metric-value">{{totalUnidades}}</p>
+      <p class="metric-sub">{{unidadesOcupadas}} ocupadas · {{unidadesVagas}} vagas</p>
+    </div>
+
+    <div class="metric-card">
+      <p class="metric-label">Receita do mês</p>
+      <p class="metric-value text-green-600">{{currency receitaMes}}</p>
+    </div>
+
+    <div class="metric-card">
+      <p class="metric-label">Despesas do mês</p>
+      <p class="metric-value text-red-500">{{currency totalDespesasMes}}</p>
+    </div>
+
+    <div class="metric-card">
+      <p class="metric-label">Lucro líquido</p>
+      <p class="metric-value {{#if (eq lucroLiquido 0)}}text-gray-400{{else}}text-brand-600{{/if}}">
+        {{currency lucroLiquido}}
+      </p>
+    </div>
+
+    <div class="metric-card">
+      <p class="metric-label">Pagamentos pendentes</p>
+      <p class="metric-value {{#if pagamentosPendentes}}text-amber-500{{else}}text-gray-400{{/if}}">
+        {{pagamentosPendentes}}
+      </p>
+    </div>
+
+    <div class="metric-card">
+      <p class="metric-label">Pagamentos atrasados</p>
+      <p class="metric-value {{#if pagamentosAtrasados}}text-red-500{{else}}text-gray-400{{/if}}">
+        {{pagamentosAtrasados}}
+      </p>
+    </div>
+
+    <div class="metric-card">
+      <p class="metric-label">Inquilinos</p>
+      <p class="metric-value">{{totalInquilinos}}</p>
+    </div>
+
+  </div>
+
+  <!-- Alertas e reajustes -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Alertas ativos</h2>
+      </div>
+      <div class="divide-y divide-gray-100" x-data="alertasBadge()" x-init="carregar()">
+        <template x-if="alertas.length === 0">
+          <p class="py-6 text-sm text-gray-400 text-center">Nenhum alerta</p>
+        </template>
+        <template x-for="a in alertas" :key="a.mensagem">
+          <a :href="a.link" class="flex items-start gap-3 py-3 hover:bg-gray-50 transition-colors rounded-lg px-2">
+            <span class="mt-1.5 w-2 h-2 rounded-full shrink-0"
+              :class="{'bg-red-500':a.tipo==='critico','bg-amber-400':a.tipo==='atencao','bg-blue-400':a.tipo==='info'}">
+            </span>
+            <span class="text-sm text-gray-700" x-text="a.mensagem"></span>
+          </a>
+        </template>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Reajustes</h2>
+      </div>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between p-3 rounded-lg bg-red-50">
+          <span class="text-sm text-red-700 font-medium">Vencidos</span>
+          <span class="text-lg font-bold text-red-600">{{reajustesVencidos}}</span>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-lg bg-amber-50">
+          <span class="text-sm text-amber-700 font-medium">Próximos 30 dias</span>
+          <span class="text-lg font-bold text-amber-600">{{reajustesProximos}}</span>
+        </div>
+        <a href="/contratos" class="block text-center text-sm text-brand-500 hover:text-brand-700 mt-2 font-medium">
+          Ver todos os contratos →
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Ações rápidas -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Ações rápidas</h2>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      <a href="/imoveis/novo" class="btn btn-secondary">+ Novo imóvel</a>
+      <a href="/inquilinos/novo" class="btn btn-secondary">+ Novo inquilino</a>
+      <a href="/contratos/novo" class="btn btn-secondary">+ Novo contrato</a>
+      <a href="/despesas/nova" class="btn btn-secondary">+ Nova despesa</a>
+      <a href="/pagamentos" class="btn btn-primary">Gerenciar pagamentos</a>
+    </div>
+  </div>
+
+</div>
