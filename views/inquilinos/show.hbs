@@ -1,0 +1,68 @@
+<div class="space-y-6">
+  <div class="flex items-start justify-between">
+    <div>
+      <a href="/inquilinos" class="text-sm text-gray-500 hover:text-gray-700">← Inquilinos</a>
+      <h2 class="text-xl font-bold text-gray-900 mt-1">{{inquilino.nome}}</h2>
+      <p class="text-gray-500 text-sm mt-0.5">{{statusLabel inquilino.tipo_pessoa}}</p>
+    </div>
+    <div class="flex gap-2">
+      <a href="/inquilinos/{{inquilino.id}}/editar" class="btn btn-secondary">Editar</a>
+      <form method="POST" action="/inquilinos/{{inquilino.id}}/excluir" onsubmit="return confirm('Excluir este inquilino?')">
+        <button type="submit" class="btn btn-danger">Excluir</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="metric-card">
+      <p class="metric-label">CPF / CNPJ</p>
+      <p class="text-base font-semibold mt-1">{{#if inquilino.cpf_cnpj}}{{inquilino.cpf_cnpj}}{{else}}—{{/if}}</p>
+    </div>
+    <div class="metric-card">
+      <p class="metric-label">Telefone</p>
+      <p class="text-base font-semibold mt-1">{{#if inquilino.telefone}}{{inquilino.telefone}}{{else}}—{{/if}}</p>
+    </div>
+    <div class="metric-card">
+      <p class="metric-label">E-mail</p>
+      <p class="text-base font-semibold mt-1 truncate">{{#if inquilino.email}}{{inquilino.email}}{{else}}—{{/if}}</p>
+    </div>
+  </div>
+
+  {{#if inquilino.observacoes}}
+  <div class="card">
+    <p class="text-sm text-gray-500 font-medium mb-1">Observações</p>
+    <p class="text-gray-700 text-sm">{{inquilino.observacoes}}</p>
+  </div>
+  {{/if}}
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Histórico de contratos</h3>
+      <a href="/contratos/novo?inquilino_id={{inquilino.id}}" class="btn btn-primary btn-sm">+ Novo contrato</a>
+    </div>
+    {{#if inquilino.contratos.length}}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr><th>Unidade</th><th>Imóvel</th><th>Aluguel</th><th>Início</th><th>Fim</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+          {{#each inquilino.contratos}}
+          <tr>
+            <td><a href="/unidades/{{unidade.id}}" class="text-brand-600 hover:underline">{{unidade.identificacao}}</a></td>
+            <td class="text-gray-500">{{unidade.imovel.nome}}</td>
+            <td>{{currency valor_aluguel}}</td>
+            <td class="text-gray-500">{{date data_inicio}}</td>
+            <td class="text-gray-500">{{#if data_fim}}{{date data_fim}}{{else}}Indeterminado{{/if}}</td>
+            <td><span class="badge {{statusClass status}}">{{statusLabel status}}</span></td>
+            <td class="text-right"><a href="/contratos/{{id}}" class="btn btn-secondary btn-sm">Ver</a></td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+    {{else}}
+    <div class="empty-state"><p>Nenhum contrato registrado.</p></div>
+    {{/if}}
+  </div>
+</div>

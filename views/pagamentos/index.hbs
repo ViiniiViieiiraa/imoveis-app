@@ -1,6 +1,98 @@
-<div class="card">
-  <div class="card-header">
-    <h2 class="card-title">Pagamentos</h2>
+<div class="space-y-4">
+
+  <!-- Filtros e ação principal -->
+  <div class="card">
+    <div class="flex flex-wrap items-end gap-4">
+      <form method="GET" action="/pagamentos" class="flex flex-wrap gap-3 items-end flex-1">
+        <div class="form-group">
+          <label class="form-label">Mês</label>
+          <select name="mes" class="form-select" style="width:auto">
+            <option value="1" {{#if (eq mes 1)}}selected{{/if}}>Janeiro</option>
+            <option value="2" {{#if (eq mes 2)}}selected{{/if}}>Fevereiro</option>
+            <option value="3" {{#if (eq mes 3)}}selected{{/if}}>Março</option>
+            <option value="4" {{#if (eq mes 4)}}selected{{/if}}>Abril</option>
+            <option value="5" {{#if (eq mes 5)}}selected{{/if}}>Maio</option>
+            <option value="6" {{#if (eq mes 6)}}selected{{/if}}>Junho</option>
+            <option value="7" {{#if (eq mes 7)}}selected{{/if}}>Julho</option>
+            <option value="8" {{#if (eq mes 8)}}selected{{/if}}>Agosto</option>
+            <option value="9" {{#if (eq mes 9)}}selected{{/if}}>Setembro</option>
+            <option value="10" {{#if (eq mes 10)}}selected{{/if}}>Outubro</option>
+            <option value="11" {{#if (eq mes 11)}}selected{{/if}}>Novembro</option>
+            <option value="12" {{#if (eq mes 12)}}selected{{/if}}>Dezembro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ano</label>
+          <input class="form-input" type="number" name="ano" value="{{ano}}" style="width:100px" min="2000" max="2100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select" style="width:auto">
+            <option value="">Todos</option>
+            <option value="pendente" {{#if (eq filtroStatus 'pendente')}}selected{{/if}}>Pendente</option>
+            <option value="pago" {{#if (eq filtroStatus 'pago')}}selected{{/if}}>Pago</option>
+            <option value="atrasado" {{#if (eq filtroStatus 'atrasado')}}selected{{/if}}>Atrasado</option>
+            <option value="isento" {{#if (eq filtroStatus 'isento')}}selected{{/if}}>Isento</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-secondary">Filtrar</button>
+      </form>
+
+      <!-- Gerar cobranças -->
+      <form method="POST" action="/pagamentos/gerar"
+        onsubmit="return confirm('Gerar cobranças para todos os contratos ativos em {{mes}}/{{ano}}?')">
+        <input type="hidden" name="mes" value="{{mes}}">
+        <input type="hidden" name="ano" value="{{ano}}">
+        <button type="submit" class="btn btn-primary">Gerar cobranças do mês</button>
+      </form>
+    </div>
   </div>
-  <p class="text-sm text-gray-400 py-8 text-center">Nenhum pagamento registrado ainda.</p>
+
+  <!-- Totais -->
+  <div class="grid grid-cols-3 gap-4">
+    <div class="metric-card">
+      <p class="metric-label">Total previsto</p>
+      <p class="metric-value mt-1">{{currency totalPrevisto}}</p>
+    </div>
+    <div class="metric-card">
+      <p class="metric-label">Total recebido</p>
+      <p class="metric-value text-green-600 mt-1">{{currency totalPago}}</p>
+    </div>
+    <div class="metric-card">
+      <p class="metric-label">Pendentes / atrasados</p>
+      <p class="metric-value {{#if totalPendente}}text-amber-500{{else}}text-gray-400{{/if}} mt-1">{{totalPendente}}</p>
+    </div>
+  </div>
+
+  <!-- Tabela -->
+  <div class="card">
+    {{#if pagamentos.length}}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr><th>Inquilino</th><th>Unidade</th><th>Imóvel</th><th>Vencimento</th><th>Previsto</th><th>Pago</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+          {{#each pagamentos}}
+          <tr>
+            <td><a href="/inquilinos/{{contrato.inquilino_id}}" class="font-medium text-brand-600 hover:underline">{{contrato.inquilino.nome}}</a></td>
+            <td><a href="/unidades/{{contrato.unidade_id}}" class="text-gray-600 hover:underline">{{contrato.unidade.identificacao}}</a></td>
+            <td class="text-gray-500">{{contrato.unidade.imovel.nome}}</td>
+            <td class="text-gray-500">{{date data_vencimento}}</td>
+            <td>{{currency valor_previsto}}</td>
+            <td>{{#if valor_pago}}{{currency valor_pago}}{{else}}—{{/if}}</td>
+            <td><span class="badge {{statusClass status}}">{{statusLabel status}}</span></td>
+            <td class="text-right"><a href="/pagamentos/{{id}}" class="btn btn-secondary btn-sm">Ver</a></td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+    {{else}}
+    <div class="empty-state">
+      <p>Nenhum pagamento para o período selecionado.</p>
+      <p class="text-xs text-gray-400 mt-1">Use "Gerar cobranças do mês" para criar os lançamentos.</p>
+    </div>
+    {{/if}}
+  </div>
 </div>

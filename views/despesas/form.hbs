@@ -1,0 +1,91 @@
+<div class="max-w-2xl">
+  <div class="mb-4">
+    <a href="/despesas" class="text-sm text-gray-500 hover:text-gray-700">← Despesas</a>
+  </div>
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">{{title}}</h2></div>
+    <form method="POST" action="{{#if despesa.id}}/despesas/{{despesa.id}}{{else}}/despesas{{/if}}" class="space-y-5">
+
+      <div class="form-group">
+        <label class="form-label" for="descricao">Descrição *</label>
+        <input class="form-input {{#if errors.descricao}}border-red-400{{/if}}" type="text" id="descricao" name="descricao" value="{{despesa.descricao}}" placeholder="Ex: Troca de torneira, IPTU 2024..." required>
+        {{#if errors.descricao}}<p class="form-error">{{errors.descricao}}</p>{{/if}}
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="imovel_id">Imóvel</label>
+          <select class="form-select" id="imovel_id" name="imovel_id">
+            <option value="">Selecione (opcional)...</option>
+            {{#each imoveis}}
+            <option value="{{id}}" {{#if (eq (json id) (json ../despesa.imovel_id))}}selected{{/if}}>{{nome}}</option>
+            {{/each}}
+          </select>
+          <p class="form-hint">Selecione imóvel <em>ou</em> unidade</p>
+          {{#if errors.imovel_id}}<p class="form-error">{{errors.imovel_id}}</p>{{/if}}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="unidade_id">Unidade</label>
+          <select class="form-select" id="unidade_id" name="unidade_id">
+            <option value="">Selecione (opcional)...</option>
+            {{#each unidades}}
+            <option value="{{id}}" {{#if (eq (json id) (json ../despesa.unidade_id))}}selected{{/if}}>{{imovel.nome}} — {{identificacao}}</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="categoria">Categoria *</label>
+          <select class="form-select {{#if errors.categoria}}border-red-400{{/if}}" id="categoria" name="categoria" required>
+            <option value="">Selecione...</option>
+            {{#each categoriasOptions}}
+            <option value="{{value}}" {{#if (eq value ../despesa.categoria)}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+          {{#if errors.categoria}}<p class="form-error">{{errors.categoria}}</p>{{/if}}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="valor">Valor (R$) *</label>
+          <input class="form-input {{#if errors.valor}}border-red-400{{/if}}" type="number" id="valor" name="valor" value="{{despesa.valor}}" step="0.01" min="0.01" required>
+          {{#if errors.valor}}<p class="form-error">{{errors.valor}}</p>{{/if}}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="data_despesa">Data *</label>
+          <input class="form-input" type="date" id="data_despesa" name="data_despesa" value="{{dateInput despesa.data_despesa}}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tipo">Tipo</label>
+          <select class="form-select" id="tipo" name="tipo">
+            <option value="avulsa" {{#if (eq despesa.tipo 'avulsa')}}selected{{/if}}>Avulsa</option>
+            <option value="recorrente" {{#if (eq despesa.tipo 'recorrente')}}selected{{/if}}>Recorrente</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="recorrencia">Recorrência</label>
+          <select class="form-select" id="recorrencia" name="recorrencia">
+            <option value="">—</option>
+            <option value="mensal" {{#if (eq despesa.recorrencia 'mensal')}}selected{{/if}}>Mensal</option>
+            <option value="anual" {{#if (eq despesa.recorrencia 'anual')}}selected{{/if}}>Anual</option>
+            <option value="outro" {{#if (eq despesa.recorrencia 'outro')}}selected{{/if}}>Outro</option>
+          </select>
+          <p class="form-hint">Apenas informativo</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="observacoes">Observações</label>
+        <textarea class="form-textarea" id="observacoes" name="observacoes" rows="3">{{despesa.observacoes}}</textarea>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="btn btn-primary">{{#if despesa.id}}Salvar alterações{{else}}Registrar despesa{{/if}}</button>
+        <a href="/despesas" class="btn btn-secondary">Cancelar</a>
+        {{#if despesa.id}}
+        <form method="POST" action="/despesas/{{despesa.id}}/excluir" class="ml-auto"
+          onsubmit="return confirm('Excluir esta despesa?')">
+          <button type="submit" class="btn btn-danger">Excluir</button>
+        </form>
+        {{/if}}
+      </div>
+    </form>
+  </div>
+</div>

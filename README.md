@@ -48,10 +48,10 @@ dev.bat
 | `npm run dev` | Inicia com hot reload (tsx watch) |
 | `npm run build` | Compila TypeScript para `dist/` |
 | `npm run start` | Inicia o servidor compilado |
-| `npm run db:migrate` | Aplica migrations pendentes |
+| `npm run db:push` | Aplica o schema no banco SQLite |
 | `npm run db:generate` | Regenera o Prisma client |
 | `npm run db:studio` | Abre o Prisma Studio (visualizador do banco) |
-| `npm run db:seed` | Insere dados de exemplo |
+| `npm run db:seed` | Insere dados de exemplo para teste |
 
 ---
 

@@ -1,0 +1,75 @@
+<div class="max-w-2xl">
+  <div class="mb-4">
+    <a href="{{#if imovel}}/imoveis/{{imovel.id}}{{else}}/imoveis{{/if}}" class="text-sm text-gray-500 hover:text-gray-700">← Voltar</a>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">{{title}}</h2>
+    </div>
+
+    <form method="POST" action="{{#if imovel.id}}/imoveis/{{imovel.id}}{{else}}/imoveis{{/if}}" class="space-y-5">
+
+      <div class="form-grid">
+        <div class="form-group col-span-2">
+          <label class="form-label" for="nome">Nome do imóvel *</label>
+          <input class="form-input {{#if errors.nome}}border-red-400{{/if}}" type="text" id="nome" name="nome" value="{{imovel.nome}}" placeholder="Ex: Edifício Central, Casa Rua das Flores..." required>
+          {{#if errors.nome}}<p class="form-error">{{errors.nome}}</p>{{/if}}
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group" style="grid-column: span 2">
+          <label class="form-label" for="endereco">Endereço *</label>
+          <input class="form-input" type="text" id="endereco" name="endereco" value="{{imovel.endereco}}" placeholder="Rua, número" required>
+          {{#if errors.endereco}}<p class="form-error">{{errors.endereco}}</p>{{/if}}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="bairro">Bairro</label>
+          <input class="form-input" type="text" id="bairro" name="bairro" value="{{imovel.bairro}}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cidade">Cidade *</label>
+          <input class="form-input" type="text" id="cidade" name="cidade" value="{{imovel.cidade}}" required>
+          {{#if errors.cidade}}<p class="form-error">{{errors.cidade}}</p>{{/if}}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="estado">Estado</label>
+          <input class="form-input" type="text" id="estado" name="estado" value="{{#if imovel.estado}}{{imovel.estado}}{{else}}SP{{/if}}" maxlength="2" style="text-transform:uppercase">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cep">CEP</label>
+          <input class="form-input" type="text" id="cep" name="cep" value="{{imovel.cep}}" placeholder="00000-000">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="tipo">Tipo do imóvel</label>
+          <select class="form-select" id="tipo" name="tipo">
+            <option value="residencial" {{#if (eq imovel.tipo 'residencial')}}selected{{/if}}>Residencial</option>
+            <option value="comercial" {{#if (eq imovel.tipo 'comercial')}}selected{{/if}}>Comercial</option>
+            <option value="misto" {{#if (eq imovel.tipo 'misto')}}selected{{/if}}>Misto</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="valor_imovel">Valor do imóvel (R$)</label>
+          <input class="form-input" type="number" id="valor_imovel" name="valor_imovel" value="{{imovel.valor_imovel}}" step="0.01" min="0" placeholder="Informativo">
+          <p class="form-hint">Apenas para referência patrimonial</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="observacoes">Observações</label>
+        <textarea class="form-textarea" id="observacoes" name="observacoes" rows="3" placeholder="Informações adicionais...">{{imovel.observacoes}}</textarea>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="btn btn-primary">
+          {{#if imovel.id}}Salvar alterações{{else}}Criar imóvel{{/if}}
+        </button>
+        <a href="{{#if imovel.id}}/imoveis/{{imovel.id}}{{else}}/imoveis{{/if}}" class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>

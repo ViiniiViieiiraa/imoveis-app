@@ -1,0 +1,71 @@
+<div class="max-w-2xl">
+  <div class="mb-4">
+    <a href="{{#if contrato.id}}/contratos/{{contrato.id}}{{else}}/contratos{{/if}}" class="text-sm text-gray-500 hover:text-gray-700">← Voltar</a>
+  </div>
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">{{title}}</h2></div>
+    <form method="POST" action="{{#if contrato.id}}/contratos/{{contrato.id}}{{else}}/contratos{{/if}}" class="space-y-5">
+
+      <div class="form-group">
+        <label class="form-label" for="unidade_id">Unidade *</label>
+        <select class="form-select {{#if errors.unidade_id}}border-red-400{{/if}}" id="unidade_id" name="unidade_id" required {{#if contrato.id}}disabled{{/if}}>
+          <option value="">Selecione uma unidade vaga...</option>
+          {{#each unidades}}
+          <option value="{{id}}" {{#if (eq (json id) (json ../contrato.unidade_id))}}selected{{/if}}>
+            {{imovel.nome}} — {{identificacao}} ({{statusLabel status}})
+          </option>
+          {{/each}}
+        </select>
+        {{#if contrato.id}}
+        <input type="hidden" name="unidade_id" value="{{contrato.unidade_id}}">
+        <p class="form-hint">A unidade não pode ser alterada em um contrato existente.</p>
+        {{/if}}
+        {{#if errors.unidade_id}}<p class="form-error">{{errors.unidade_id}}</p>{{/if}}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="inquilino_id">Inquilino *</label>
+        <select class="form-select {{#if errors.inquilino_id}}border-red-400{{/if}}" id="inquilino_id" name="inquilino_id" required>
+          <option value="">Selecione um inquilino...</option>
+          {{#each inquilinos}}
+          <option value="{{id}}" {{#if (eq (json id) (json ../contrato.inquilino_id))}}selected{{/if}}>{{nome}}</option>
+          {{/each}}
+        </select>
+        {{#if errors.inquilino_id}}<p class="form-error">{{errors.inquilino_id}}</p>{{/if}}
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="valor_aluguel">Valor do aluguel (R$) *</label>
+          <input class="form-input" type="number" id="valor_aluguel" name="valor_aluguel" value="{{contrato.valor_aluguel}}" step="0.01" min="0" required>
+          {{#if errors.valor_aluguel}}<p class="form-error">{{errors.valor_aluguel}}</p>{{/if}}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="dia_vencimento">Dia de vencimento *</label>
+          <input class="form-input" type="number" id="dia_vencimento" name="dia_vencimento" value="{{contrato.dia_vencimento}}" min="1" max="28" required>
+          <p class="form-hint">Entre 1 e 28</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="data_inicio">Data de início *</label>
+          <input class="form-input" type="date" id="data_inicio" name="data_inicio" value="{{dateInput contrato.data_inicio}}" required>
+          {{#if errors.data_inicio}}<p class="form-error">{{errors.data_inicio}}</p>{{/if}}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="data_fim">Data de término</label>
+          <input class="form-input" type="date" id="data_fim" name="data_fim" value="{{dateInput contrato.data_fim}}">
+          <p class="form-hint">Deixe em branco para prazo indeterminado</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="observacoes">Observações</label>
+        <textarea class="form-textarea" id="observacoes" name="observacoes" rows="3">{{contrato.observacoes}}</textarea>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="btn btn-primary">{{#if contrato.id}}Salvar alterações{{else}}Criar contrato{{/if}}</button>
+        <a href="{{#if contrato.id}}/contratos/{{contrato.id}}{{else}}/contratos{{/if}}" class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>

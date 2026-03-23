@@ -1,5 +1,6 @@
 import 'dotenv/config'
 import Fastify from 'fastify'
+import formbody from '@fastify/formbody'
 import { config } from './config'
 import { prisma } from './database'
 
@@ -26,6 +27,7 @@ const fastify = Fastify({
 })
 
 async function bootstrap() {
+  await fastify.register(formbody)
   await fastify.register(staticPlugin)
   await fastify.register(viewsPlugin)
   await fastify.register(errorHandlerPlugin)

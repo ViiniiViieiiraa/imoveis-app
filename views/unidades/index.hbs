@@ -1,7 +1,60 @@
+
 <div class="card">
   <div class="card-header">
     <h2 class="card-title">Unidades</h2>
     <a href="/unidades/nova" class="btn btn-primary">+ Nova unidade</a>
   </div>
-  <p class="text-sm text-gray-400 py-8 text-center">Nenhuma unidade cadastrada ainda.</p>
+
+  <!-- Filtros -->
+  <form method="GET" action="/unidades" class="flex flex-wrap gap-3 mb-4">
+    <select name="status" class="form-select" style="width:auto">
+      <option value="">Todos os status</option>
+      <option value="vaga" {{#if (eq filtroStatus 'vaga')}}selected{{/if}}>Vagas</option>
+      <option value="ocupada" {{#if (eq filtroStatus 'ocupada')}}selected{{/if}}>Ocupadas</option>
+      <option value="indisponivel" {{#if (eq filtroStatus 'indisponivel')}}selected{{/if}}>Indisponíveis</option>
+    </select>
+    <select name="imovel_id" class="form-select" style="width:auto">
+      <option value="">Todos os imóveis</option>
+      {{#each imoveis}}
+      <option value="{{id}}" {{#if (eq (json id) ../filtroImovel)}}selected{{/if}}>{{nome}}</option>
+      {{/each}}
+    </select>
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+    <a href="/unidades" class="btn btn-secondary">Limpar</a>
+  </form>
+
+  {{#if unidades.length}}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Identificação</th>
+          <th>Imóvel</th>
+          <th>Tipo</th>
+          <th>Aluguel</th>
+          <th>Vencimento</th>
+          <th>Status</th>
+          <th>Inquilino</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each unidades}}
+        <tr>
+          <td><a href="/unidades/{{id}}" class="font-medium text-brand-600 hover:underline">{{identificacao}}</a></td>
+          <td><a href="/imoveis/{{imovel.id}}" class="text-gray-600 hover:underline">{{imovel.nome}}</a></td>
+          <td class="text-gray-500 capitalize">{{tipo}}</td>
+          <td>{{currency valor_aluguel}}</td>
+          <td class="text-gray-500">Dia {{dia_vencimento}}</td>
+          <td><span class="badge {{statusClass status}}">{{statusLabel status}}</span></td>
+          <td class="text-gray-500">{{#if contratos.[0].inquilino.nome}}{{contratos.[0].inquilino.nome}}{{else}}—{{/if}}</td>
+          <td class="text-right"><a href="/unidades/{{id}}" class="btn btn-secondary btn-sm">Ver</a></td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}
+  <div class="empty-state"><p>Nenhuma unidade encontrada.</p></div>
+  {{/if}}
 </div>

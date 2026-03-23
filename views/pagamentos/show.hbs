@@ -1,0 +1,92 @@
+<div class="space-y-6 max-w-2xl">
+  <div>
+    <a href="/pagamentos" class="text-sm text-gray-500 hover:text-gray-700">← Pagamentos</a>
+    <div class="flex items-center gap-3 mt-1">
+      <h2 class="text-xl font-bold text-gray-900">Pagamento #{{pagamento.id}}</h2>
+      <span class="badge {{statusClass pagamento.status}}">{{statusLabel pagamento.status}}</span>
+    </div>
+    <p class="text-gray-500 text-sm mt-0.5">
+      <a href="/contratos/{{pagamento.contrato_id}}" class="hover:underline">Contrato #{{pagamento.contrato_id}}</a>
+      — <a href="/inquilinos/{{pagamento.contrato.inquilino.id}}" class="hover:underline">{{pagamento.contrato.inquilino.nome}}</a>
+      — <a href="/unidades/{{pagamento.contrato.unidade.id}}" class="hover:underline">{{pagamento.contrato.unidade.identificacao}}</a>
+    </p>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div class="metric-card"><p class="metric-label">Referência</p><p class="text-base font-semibold mt-1">{{pagamento.mes_referencia}}/{{pagamento.ano_referencia}}</p></div>
+    <div class="metric-card"><p class="metric-label">Vencimento</p><p class="text-base font-semibold mt-1">{{date pagamento.data_vencimento}}</p></div>
+    <div class="metric-card"><p class="metric-label">Valor previsto</p><p class="text-base font-semibold mt-1">{{currency pagamento.valor_previsto}}</p></div>
+    <div class="metric-card"><p class="metric-label">Valor pago</p><p class="text-base font-semibold mt-1 {{#if pagamento.valor_pago}}text-green-600{{else}}text-gray-400{{/if}}">{{#if pagamento.valor_pago}}{{currency pagamento.valor_pago}}{{else}}—{{/if}}</p></div>
+  </div>
+
+  <!-- Registrar pagamento (se pendente/atrasado) -->
+  {{#if (neq pagamento.status 'pago')}}
+  {{#if (neq pagamento.status 'isento')}}
+  <div class="card border-l-4 border-brand-500">
+    <h3 class="card-title mb-4">Registrar pagamento</h3>
+    <form method="POST" action="/pagamentos/{{pagamento.id}}/registrar" class="flex flex-wrap gap-4 items-end">
+      <div class="form-group">
+        <label class="form-label" for="valor_pago">Valor recebido (R$) *</label>
+        <input class="form-input" type="number" id="valor_pago" name="valor_pago"
+          value="{{number pagamento.valor_previsto}}" step="0.01" min="0.01" style="width:180px" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="data_pagamento">Data do pagamento *</label>
+        <input class="form-input" type="date" id="data_pagamento" name="data_pagamento"
+          value="{{dateInput hoje}}" required>
+      </div>
+      <div class="form-group" style="flex:1;min-width:180px">
+        <label class="form-label" for="observacoes">Observações</label>
+        <input class="form-input" type="text" id="observacoes" name="observacoes" placeholder="Opcional">
+      </div>
+      <div>
+        <button type="submit" class="btn btn-primary">Confirmar recebimento</button>
+      </div>
+    </form>
+  </div>
+  {{/if}}
+  {{/if}}
+
+  <!-- Edição manual -->
+  <div class="card" x-data="{aberto: false}">
+    <div class="card-header">
+      <h3 class="card-title">Edição manual</h3>
+      <button type="button" @click="aberto = !aberto" class="btn btn-secondary btn-sm">
+        <span x-text="aberto ? 'Cancelar' : 'Editar'"></span>
+      </button>
+    </div>
+    <div x-show="aberto" x-transition class="mt-2">
+      <form method="POST" action="/pagamentos/{{pagamento.id}}/editar" class="flex flex-wrap gap-4 items-end">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select" name="status" style="width:auto">
+            <option value="pendente" {{#if (eq pagamento.status 'pendente')}}selected{{/if}}>Pendente</option>
+            <option value="pago" {{#if (eq pagamento.status 'pago')}}selected{{/if}}>Pago</option>
+            <option value="atrasado" {{#if (eq pagamento.status 'atrasado')}}selected{{/if}}>Atrasado</option>
+            <option value="isento" {{#if (eq pagamento.status 'isento')}}selected{{/if}}>Isento</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Valor pago</label>
+          <input class="form-input" type="number" name="valor_pago" value="{{pagamento.valor_pago}}" step="0.01" style="width:150px">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data pagamento</label>
+          <input class="form-input" type="date" name="data_pagamento" value="{{dateInput pagamento.data_pagamento}}">
+        </div>
+        <div class="form-group" style="flex:1;min-width:180px">
+          <label class="form-label">Observações</label>
+          <input class="form-input" type="text" name="observacoes" value="{{pagamento.observacoes}}">
+        </div>
+        <div><button type="submit" class="btn btn-secondary">Salvar</button></div>
+      </form>
+    </div>
+  </div>
+
+  {{#if pagamento.observacoes}}
+  <div class="card">
+    <p class="text-sm text-gray-500 font-medium mb-1">Observações</p>
+    <p class="text-gray-700 text-sm">{{pagamento.observacoes}}</p>
+  </div>
+  {{/if}}
+</div>

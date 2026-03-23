@@ -1,7 +1,55 @@
+
 <div class="card">
   <div class="card-header">
     <h2 class="card-title">Imóveis cadastrados</h2>
     <a href="/imoveis/novo" class="btn btn-primary">+ Novo imóvel</a>
   </div>
-  <p class="text-sm text-gray-400 py-8 text-center">Nenhum imóvel cadastrado ainda.</p>
+
+  {{#if imoveis.length}}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Endereço</th>
+          <th>Cidade</th>
+          <th>Tipo</th>
+          <th>Unidades</th>
+          <th>Ocupação</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each imoveis}}
+        <tr>
+          <td><a href="/imoveis/{{id}}" class="font-medium text-brand-600 hover:underline">{{nome}}</a></td>
+          <td class="text-gray-500">{{endereco}}{{#if bairro}}, {{bairro}}{{/if}}</td>
+          <td class="text-gray-500">{{cidade}}/{{estado}}</td>
+          <td><span class="badge badge-neutral">{{statusLabel tipo}}</span></td>
+          <td class="text-center">{{_count.unidades}}</td>
+          <td>
+            {{#if _count.unidades}}
+              {{#each unidades}}{{#if (eq status 'ocupada')}}✓{{/if}}{{/each}}
+              <span class="text-sm text-gray-500">
+                {{#with ../unidades}}{{/with}}
+                —
+              </span>
+            {{else}}
+              <span class="text-gray-400 text-sm">—</span>
+            {{/if}}
+          </td>
+          <td class="text-right">
+            <a href="/imoveis/{{id}}" class="btn btn-secondary btn-sm">Ver</a>
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}
+  <div class="empty-state">
+    <p>Nenhum imóvel cadastrado.</p>
+    <a href="/imoveis/novo" class="btn btn-primary mt-4">Cadastrar primeiro imóvel</a>
+  </div>
+  {{/if}}
 </div>

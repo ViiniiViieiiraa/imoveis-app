@@ -1,0 +1,72 @@
+<div class="max-w-2xl">
+  <div class="mb-4">
+    <a href="{{#if unidade.id}}/unidades/{{unidade.id}}{{else}}/unidades{{/if}}" class="text-sm text-gray-500 hover:text-gray-700">← Voltar</a>
+  </div>
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">{{title}}</h2></div>
+    <form method="POST" action="{{#if unidade.id}}/unidades/{{unidade.id}}{{else}}/unidades{{/if}}" class="space-y-5">
+
+      <div class="form-group">
+        <label class="form-label" for="imovel_id">Imóvel *</label>
+        <select class="form-select {{#if errors.imovel_id}}border-red-400{{/if}}" id="imovel_id" name="imovel_id" required>
+          <option value="">Selecione...</option>
+          {{#each imoveis}}
+          <option value="{{id}}" {{#if (eq (json id) (json ../unidade.imovel_id))}}selected{{/if}}>{{nome}}</option>
+          {{/each}}
+        </select>
+        {{#if errors.imovel_id}}<p class="form-error">{{errors.imovel_id}}</p>{{/if}}
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="identificacao">Identificação *</label>
+          <input class="form-input" type="text" id="identificacao" name="identificacao" value="{{unidade.identificacao}}" placeholder="Ex: Apto 101, Sala 3..." required>
+          {{#if errors.identificacao}}<p class="form-error">{{errors.identificacao}}</p>{{/if}}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tipo">Tipo</label>
+          <select class="form-select" id="tipo" name="tipo">
+            <option value="apartamento" {{#if (eq unidade.tipo 'apartamento')}}selected{{/if}}>Apartamento</option>
+            <option value="casa" {{#if (eq unidade.tipo 'casa')}}selected{{/if}}>Casa</option>
+            <option value="sala" {{#if (eq unidade.tipo 'sala')}}selected{{/if}}>Sala Comercial</option>
+            <option value="galpao" {{#if (eq unidade.tipo 'galpao')}}selected{{/if}}>Galpão</option>
+            <option value="outro" {{#if (eq unidade.tipo 'outro')}}selected{{/if}}>Outro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="valor_aluguel">Valor do aluguel (R$) *</label>
+          <input class="form-input" type="number" id="valor_aluguel" name="valor_aluguel" value="{{unidade.valor_aluguel}}" step="0.01" min="0" required>
+          {{#if errors.valor_aluguel}}<p class="form-error">{{errors.valor_aluguel}}</p>{{/if}}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="dia_vencimento">Dia de vencimento *</label>
+          <input class="form-input" type="number" id="dia_vencimento" name="dia_vencimento" value="{{unidade.dia_vencimento}}" min="1" max="28" required>
+          <p class="form-hint">Entre 1 e 28</p>
+          {{#if errors.dia_vencimento}}<p class="form-error">{{errors.dia_vencimento}}</p>{{/if}}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="area_m2">Área (m²)</label>
+          <input class="form-input" type="number" id="area_m2" name="area_m2" value="{{unidade.area_m2}}" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="status">Status</label>
+          <select class="form-select" id="status" name="status">
+            <option value="vaga" {{#if (eq unidade.status 'vaga')}}selected{{/if}}>Vaga</option>
+            <option value="ocupada" {{#if (eq unidade.status 'ocupada')}}selected{{/if}}>Ocupada</option>
+            <option value="indisponivel" {{#if (eq unidade.status 'indisponivel')}}selected{{/if}}>Indisponível</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="observacoes">Observações</label>
+        <textarea class="form-textarea" id="observacoes" name="observacoes" rows="3">{{unidade.observacoes}}</textarea>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="btn btn-primary">{{#if unidade.id}}Salvar alterações{{else}}Criar unidade{{/if}}</button>
+        <a href="{{#if unidade.id}}/unidades/{{unidade.id}}{{else}}/unidades{{/if}}" class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>

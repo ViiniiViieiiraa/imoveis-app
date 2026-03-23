@@ -1,0 +1,73 @@
+<div class="space-y-6">
+  <div class="flex items-start justify-between">
+    <div>
+      <a href="/unidades" class="text-sm text-gray-500 hover:text-gray-700">← Unidades</a>
+      <div class="flex items-center gap-3 mt-1">
+        <h2 class="text-xl font-bold text-gray-900">{{unidade.identificacao}}</h2>
+        <span class="badge {{statusClass unidade.status}}">{{statusLabel unidade.status}}</span>
+      </div>
+      <p class="text-gray-500 text-sm mt-0.5">
+        <a href="/imoveis/{{unidade.imovel.id}}" class="hover:underline">{{unidade.imovel.nome}}</a> — {{unidade.imovel.cidade}}
+      </p>
+    </div>
+    <div class="flex gap-2">
+      <a href="/unidades/{{unidade.id}}/editar" class="btn btn-secondary">Editar</a>
+      <form method="POST" action="/unidades/{{unidade.id}}/excluir" onsubmit="return confirm('Excluir esta unidade?')">
+        <button type="submit" class="btn btn-danger">Excluir</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="metric-card"><p class="metric-label">Tipo</p><p class="text-base font-semibold mt-1 capitalize">{{unidade.tipo}}</p></div>
+    <div class="metric-card"><p class="metric-label">Aluguel (tabela)</p><p class="text-base font-semibold mt-1">{{currency unidade.valor_aluguel}}</p></div>
+    <div class="metric-card"><p class="metric-label">Dia de vencimento</p><p class="text-base font-semibold mt-1">Dia {{unidade.dia_vencimento}}</p></div>
+    <div class="metric-card"><p class="metric-label">Área</p><p class="text-base font-semibold mt-1">{{#if unidade.area_m2}}{{unidade.area_m2}} m²{{else}}—{{/if}}</p></div>
+  </div>
+
+  {{#if contratoAtivo}}
+  <div class="card border-l-4 border-green-500">
+    <div class="card-header">
+      <h3 class="card-title">Contrato ativo</h3>
+      <a href="/contratos/{{contratoAtivo.id}}" class="btn btn-secondary btn-sm">Ver contrato</a>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div><p class="metric-label">Inquilino</p><p class="font-medium text-gray-800 mt-1">{{contratoAtivo.inquilino.nome}}</p></div>
+      <div><p class="metric-label">Aluguel contrato</p><p class="font-medium text-green-600 mt-1">{{currency contratoAtivo.valor_aluguel}}</p></div>
+      <div><p class="metric-label">Início</p><p class="font-medium text-gray-800 mt-1">{{date contratoAtivo.data_inicio}}</p></div>
+      <div><p class="metric-label">Próximo reajuste</p><p class="font-medium text-gray-800 mt-1">{{date contratoAtivo.proximo_reajuste}}</p></div>
+    </div>
+  </div>
+  {{else}}
+  <div class="card border-l-4 border-amber-400">
+    <div class="flex items-center justify-between">
+      <p class="text-amber-700 font-medium">Unidade sem contrato ativo</p>
+      <a href="/contratos/novo?unidade_id={{unidade.id}}" class="btn btn-primary btn-sm">+ Novo contrato</a>
+    </div>
+  </div>
+  {{/if}}
+
+  {{#if unidade.despesas.length}}
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Despesas recentes</h3>
+      <a href="/despesas?unidade_id={{unidade.id}}" class="text-sm text-brand-500 hover:underline">Ver todas</a>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Descrição</th><th>Categoria</th><th>Data</th><th>Valor</th></tr></thead>
+        <tbody>
+          {{#each unidade.despesas}}
+          <tr>
+            <td>{{descricao}}</td>
+            <td class="text-gray-500 capitalize">{{categoria}}</td>
+            <td class="text-gray-500">{{date data_despesa}}</td>
+            <td class="text-red-600">{{currency valor}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {{/if}}
+</div>

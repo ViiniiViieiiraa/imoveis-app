@@ -1,7 +1,91 @@
-<div class="card">
-  <div class="card-header">
-    <h2 class="card-title">Despesas</h2>
-    <a href="/despesas/nova" class="btn btn-primary">+ Nova despesa</a>
+<div class="space-y-4">
+  <div class="card">
+    <form method="GET" action="/despesas" class="flex flex-wrap gap-3 items-end">
+      <div class="form-group">
+        <label class="form-label">Mês</label>
+        <select name="mes" class="form-select" style="width:auto">
+          <option value="">Todos</option>
+          <option value="1" {{#if (eq filtroMes '1')}}selected{{/if}}>Jan</option>
+          <option value="2" {{#if (eq filtroMes '2')}}selected{{/if}}>Fev</option>
+          <option value="3" {{#if (eq filtroMes '3')}}selected{{/if}}>Mar</option>
+          <option value="4" {{#if (eq filtroMes '4')}}selected{{/if}}>Abr</option>
+          <option value="5" {{#if (eq filtroMes '5')}}selected{{/if}}>Mai</option>
+          <option value="6" {{#if (eq filtroMes '6')}}selected{{/if}}>Jun</option>
+          <option value="7" {{#if (eq filtroMes '7')}}selected{{/if}}>Jul</option>
+          <option value="8" {{#if (eq filtroMes '8')}}selected{{/if}}>Ago</option>
+          <option value="9" {{#if (eq filtroMes '9')}}selected{{/if}}>Set</option>
+          <option value="10" {{#if (eq filtroMes '10')}}selected{{/if}}>Out</option>
+          <option value="11" {{#if (eq filtroMes '11')}}selected{{/if}}>Nov</option>
+          <option value="12" {{#if (eq filtroMes '12')}}selected{{/if}}>Dez</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ano</label>
+        <input class="form-input" type="number" name="ano" value="{{filtroAno}}" style="width:90px" min="2000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Imóvel</label>
+        <select name="imovel_id" class="form-select" style="width:auto">
+          <option value="">Todos</option>
+          {{#each imoveis}}
+          <option value="{{id}}" {{#if (eq (json id) ../filtroImovel)}}selected{{/if}}>{{nome}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <select name="categoria" class="form-select" style="width:auto">
+          <option value="">Todas</option>
+          {{#each categoriasOptions}}
+          <option value="{{value}}" {{#if (eq value ../filtroCategoria)}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-secondary">Filtrar</button>
+      <a href="/despesas" class="btn btn-secondary">Limpar</a>
+      <div class="ml-auto">
+        <a href="/despesas/nova" class="btn btn-primary">+ Nova despesa</a>
+      </div>
+    </form>
   </div>
-  <p class="text-sm text-gray-400 py-8 text-center">Nenhuma despesa registrada ainda.</p>
+
+  <div class="metric-card">
+    <p class="metric-label">Total filtrado</p>
+    <p class="metric-value text-red-500 mt-1">{{currency total}}</p>
+  </div>
+
+  <div class="card">
+    {{#if despesas.length}}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr><th>Descrição</th><th>Imóvel / Unidade</th><th>Categoria</th><th>Tipo</th><th>Data</th><th>Valor</th><th></th></tr>
+        </thead>
+        <tbody>
+          {{#each despesas}}
+          <tr>
+            <td class="font-medium">{{descricao}}</td>
+            <td class="text-gray-500">
+              {{#if unidade}}
+                {{unidade.imovel.nome}} — {{unidade.identificacao}}
+              {{else if imovel}}
+                {{imovel.nome}}
+              {{else}}—{{/if}}
+            </td>
+            <td class="text-gray-500 capitalize">{{statusLabel categoria}}</td>
+            <td><span class="badge {{#if (eq tipo 'recorrente')}}badge-info{{else}}badge-neutral{{/if}}">{{statusLabel tipo}}</span></td>
+            <td class="text-gray-500">{{date data_despesa}}</td>
+            <td class="text-red-600 font-medium">{{currency valor}}</td>
+            <td class="text-right">
+              <a href="/despesas/{{id}}/editar" class="btn btn-secondary btn-sm">Editar</a>
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+    {{else}}
+    <div class="empty-state"><p>Nenhuma despesa encontrada.</p></div>
+    {{/if}}
+  </div>
 </div>

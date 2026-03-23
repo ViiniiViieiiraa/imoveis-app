@@ -3,5 +3,54 @@
     <h2 class="card-title">Inquilinos</h2>
     <a href="/inquilinos/novo" class="btn btn-primary">+ Novo inquilino</a>
   </div>
-  <p class="text-sm text-gray-400 py-8 text-center">Nenhum inquilino cadastrado ainda.</p>
+
+  <form method="GET" action="/inquilinos" class="flex gap-3 mb-4">
+    <input class="form-input" type="text" name="busca" value="{{busca}}" placeholder="Buscar por nome..." style="max-width:280px">
+    <button type="submit" class="btn btn-secondary">Buscar</button>
+    {{#if busca}}<a href="/inquilinos" class="btn btn-secondary">Limpar</a>{{/if}}
+  </form>
+
+  {{#if inquilinos.length}}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Tipo</th>
+          <th>CPF / CNPJ</th>
+          <th>Telefone</th>
+          <th>E-mail</th>
+          <th>Contratos</th>
+          <th>Situação</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each inquilinos}}
+        <tr>
+          <td><a href="/inquilinos/{{id}}" class="font-medium text-brand-600 hover:underline">{{nome}}</a></td>
+          <td class="text-gray-500">{{statusLabel tipo_pessoa}}</td>
+          <td class="text-gray-500">{{#if cpf_cnpj}}{{cpf_cnpj}}{{else}}—{{/if}}</td>
+          <td class="text-gray-500">{{#if telefone}}{{telefone}}{{else}}—{{/if}}</td>
+          <td class="text-gray-500">{{#if email}}{{email}}{{else}}—{{/if}}</td>
+          <td class="text-center text-gray-500">{{_count.contratos}}</td>
+          <td>
+            {{#if contratos.length}}
+              <span class="badge badge-success">Ativo</span>
+            {{else}}
+              <span class="badge badge-neutral">Sem contrato</span>
+            {{/if}}
+          </td>
+          <td class="text-right"><a href="/inquilinos/{{id}}" class="btn btn-secondary btn-sm">Ver</a></td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}
+  <div class="empty-state">
+    <p>{{#if busca}}Nenhum inquilino encontrado para "{{busca}}".{{else}}Nenhum inquilino cadastrado.{{/if}}</p>
+    {{#unless busca}}<a href="/inquilinos/novo" class="btn btn-primary mt-4">Cadastrar primeiro inquilino</a>{{/unless}}
+  </div>
+  {{/if}}
 </div>

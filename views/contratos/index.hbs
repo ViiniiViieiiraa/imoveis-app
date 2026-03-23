@@ -3,5 +3,42 @@
     <h2 class="card-title">Contratos</h2>
     <a href="/contratos/novo" class="btn btn-primary">+ Novo contrato</a>
   </div>
-  <p class="text-sm text-gray-400 py-8 text-center">Nenhum contrato cadastrado ainda.</p>
+
+  <form method="GET" action="/contratos" class="flex gap-3 mb-4">
+    <select name="status" class="form-select" style="width:auto">
+      <option value="">Todos os status</option>
+      <option value="ativo" {{#if (eq filtroStatus 'ativo')}}selected{{/if}}>Ativos</option>
+      <option value="encerrado" {{#if (eq filtroStatus 'encerrado')}}selected{{/if}}>Encerrados</option>
+      <option value="suspenso" {{#if (eq filtroStatus 'suspenso')}}selected{{/if}}>Suspensos</option>
+    </select>
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+    {{#if filtroStatus}}<a href="/contratos" class="btn btn-secondary">Limpar</a>{{/if}}
+  </form>
+
+  {{#if contratos.length}}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>#</th><th>Inquilino</th><th>Unidade</th><th>Imóvel</th><th>Aluguel</th><th>Início</th><th>Próx. reajuste</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        {{#each contratos}}
+        <tr>
+          <td class="text-gray-400">#{{id}}</td>
+          <td><a href="/inquilinos/{{inquilino_id}}" class="font-medium text-brand-600 hover:underline">{{inquilino.nome}}</a></td>
+          <td><a href="/unidades/{{unidade_id}}" class="text-gray-600 hover:underline">{{unidade.identificacao}}</a></td>
+          <td class="text-gray-500">{{unidade.imovel.nome}}</td>
+          <td>{{currency valor_aluguel}}</td>
+          <td class="text-gray-500">{{date data_inicio}}</td>
+          <td class="text-gray-500">{{date proximo_reajuste}}</td>
+          <td><span class="badge {{statusClass status}}">{{statusLabel status}}</span></td>
+          <td class="text-right"><a href="/contratos/{{id}}" class="btn btn-secondary btn-sm">Ver</a></td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}
+  <div class="empty-state"><p>Nenhum contrato encontrado.</p></div>
+  {{/if}}
 </div>
