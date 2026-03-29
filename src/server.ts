@@ -16,6 +16,7 @@ import contratosRoutes from './modules/contratos/contratos.routes'
 import pagamentosRoutes from './modules/pagamentos/pagamentos.routes'
 import despesasRoutes from './modules/despesas/despesas.routes'
 import alertasRoutes from './modules/alertas/alertas.routes'
+import configuracoesRoutes from './modules/configuracoes/configuracoes.routes'
 
 const fastify = Fastify({
   logger: {
@@ -40,6 +41,7 @@ async function bootstrap() {
   await fastify.register(pagamentosRoutes)
   await fastify.register(despesasRoutes)
   await fastify.register(alertasRoutes)
+  await fastify.register(configuracoesRoutes)
 
   await fastify.listen({ port: config.port, host: config.host })
   console.log(`\n  Sistema rodando em http://${config.host}:${config.port}\n`)

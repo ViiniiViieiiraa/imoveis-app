@@ -1,0 +1,81 @@
+<div class="max-w-2xl space-y-6">
+
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Template de mensagem de cobrança</h2>
+    </div>
+
+    <div class="alert alert-info mb-4">
+      <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <div class="text-sm">
+        <p class="font-medium mb-1">Variáveis disponíveis:</p>
+        <p><code class="bg-blue-100 px-1 rounded">{nome}</code> — nome do inquilino</p>
+        <p><code class="bg-blue-100 px-1 rounded">{unidade}</code> — identificação da unidade</p>
+        <p><code class="bg-blue-100 px-1 rounded">{imovel}</code> — nome do imóvel</p>
+        <p><code class="bg-blue-100 px-1 rounded">{valor}</code> — valor total a pagar</p>
+        <p><code class="bg-blue-100 px-1 rounded">{vencimento}</code> — data de vencimento</p>
+        <p><code class="bg-blue-100 px-1 rounded">{mes_referencia}</code> — mês/ano de referência</p>
+        <p><code class="bg-blue-100 px-1 rounded">{saldo_anterior}</code> — linha de aviso de saldo devedor anterior (aparece só se houver)</p>
+      </div>
+    </div>
+
+    <form method="POST" action="/configuracoes" class="space-y-4">
+      <div class="form-group">
+        <label class="form-label" for="template_cobranca">Texto da mensagem</label>
+        <textarea
+          class="form-textarea font-mono text-sm"
+          id="template_cobranca"
+          name="template_cobranca"
+          rows="12"
+          style="white-space: pre-wrap"
+        >{{template}}</textarea>
+        <p class="form-hint">Use as variáveis acima. O texto suporta formatação do WhatsApp (*negrito*, _itálico_).</p>
+      </div>
+
+      <div class="flex gap-3">
+        <button type="submit" class="btn btn-primary">Salvar template</button>
+        <button type="button" class="btn btn-secondary"
+          onclick="document.getElementById('template_cobranca').value = `{{templatePadrao}}`">
+          Restaurar padrão
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" x-data="{aberto: false}">
+    <div class="card-header">
+      <h3 class="card-title">Prévia da mensagem</h3>
+      <button type="button" @click="aberto = !aberto" class="btn btn-secondary btn-sm">
+        <span x-text="aberto ? 'Fechar' : 'Ver prévia'"></span>
+      </button>
+    </div>
+    <div x-show="aberto" x-transition class="mt-2">
+      <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-wrap font-mono border">
+        <p class="text-xs text-gray-400 mb-2">Exemplo com dados fictícios:</p>
+        <div id="previa-texto"></div>
+      </div>
+      <script>
+        document.addEventListener('alpine:init', () => {
+          const template = document.getElementById('template_cobranca')
+          const previa = document.getElementById('previa-texto')
+          function atualizar() {
+            let t = template ? template.value : ''
+            t = t.replace(/{nome}/g, 'João Silva')
+            t = t.replace(/{unidade}/g, 'Apto 101')
+            t = t.replace(/{imovel}/g, 'Edifício Central')
+            t = t.replace(/{valor}/g, 'R$ 1.800,00')
+            t = t.replace(/{vencimento}/g, '10/05/2025')
+            t = t.replace(/{mes_referencia}/g, 'Maio/2025')
+            t = t.replace(/{saldo_anterior}/g, '⚠️ Saldo devedor anterior: R$ 300,00\n')
+            if (previa) previa.textContent = t
+          }
+          if (template) template.addEventListener('input', atualizar)
+          atualizar()
+        })
+      </script>
+    </div>
+  </div>
+
+</div>

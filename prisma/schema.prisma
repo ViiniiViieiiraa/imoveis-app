@@ -92,22 +92,29 @@ model HistoricoReajuste {
 }
 
 model Pagamento {
-  id              Int       @id @default(autoincrement())
-  contrato_id     Int
-  mes_referencia  Int
-  ano_referencia  Int
-  valor_previsto  Decimal
-  valor_pago      Decimal?
-  data_vencimento DateTime
-  data_pagamento  DateTime?
-  status          String    @default("pendente")
-  observacoes     String?
-  criado_em       DateTime  @default(now())
-  atualizado_em   DateTime  @updatedAt
+  id                Int       @id @default(autoincrement())
+  contrato_id       Int
+  mes_referencia    Int
+  ano_referencia    Int
+  valor_previsto    Decimal
+  saldo_incorporado Decimal   @default(0)
+  valor_pago        Decimal?
+  data_vencimento   DateTime
+  data_pagamento    DateTime?
+  status            String    @default("pendente")
+  observacoes       String?
+  criado_em         DateTime  @default(now())
+  atualizado_em     DateTime  @updatedAt
 
   contrato Contrato @relation(fields: [contrato_id], references: [id])
 
   @@unique([contrato_id, mes_referencia, ano_referencia])
+}
+
+model Configuracao {
+  id    Int    @id @default(autoincrement())
+  chave String @unique
+  valor String
 }
 
 model Despesa {

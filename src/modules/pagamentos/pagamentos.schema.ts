@@ -9,10 +9,14 @@ export const registrarPagamentoSchema = z.object({
 export const gerarCobrancasSchema = z.object({
   mes: z.coerce.number().int().min(1).max(12),
   ano: z.coerce.number().int().min(2000),
+  contrato_ids: z.union([
+    z.string().transform((v) => [Number(v)]),
+    z.array(z.string()).transform((arr) => arr.map(Number)),
+  ]).optional().transform((v) => v ?? []),
 })
 
 export const editarPagamentoSchema = z.object({
-  status: z.enum(['pendente', 'pago', 'atrasado', 'isento']),
+  status: z.enum(['pendente', 'pago', 'atrasado', 'isento', 'parcial']),
   valor_pago: z.preprocess(
     (v) => (v === '' || v == null ? null : Number(v)),
     z.number().positive().nullable().optional(),

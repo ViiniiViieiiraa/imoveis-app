@@ -35,7 +35,7 @@ export default fp(async (fastify) => {
     const map: Record<string, string> = {
       vaga: 'Vaga', ocupada: 'Ocupada', indisponivel: 'Indisponível',
       ativo: 'Ativo', encerrado: 'Encerrado', suspenso: 'Suspenso',
-      pendente: 'Pendente', pago: 'Pago', atrasado: 'Atrasado', isento: 'Isento',
+      pendente: 'Pendente', pago: 'Pago', atrasado: 'Atrasado', isento: 'Isento', parcial: 'Parcial',
       residencial: 'Residencial', comercial: 'Comercial', misto: 'Misto',
       fisica: 'Pessoa Física', juridica: 'Pessoa Jurídica',
       avulsa: 'Avulsa', recorrente: 'Recorrente',
@@ -47,7 +47,7 @@ export default fp(async (fastify) => {
     const map: Record<string, string> = {
       vaga: 'badge-warning', ocupada: 'badge-success', indisponivel: 'badge-neutral',
       ativo: 'badge-success', encerrado: 'badge-neutral', suspenso: 'badge-warning',
-      pendente: 'badge-warning', pago: 'badge-success', atrasado: 'badge-danger', isento: 'badge-neutral',
+      pendente: 'badge-warning', pago: 'badge-success', atrasado: 'badge-danger', isento: 'badge-neutral', parcial: 'badge-info',
     }
     return map[status] ?? 'badge-neutral'
   })
