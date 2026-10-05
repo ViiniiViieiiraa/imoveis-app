@@ -24,13 +24,15 @@ export default async function pagamentosRoutes(fastify: FastifyInstance) {
       getContratosParaGeracao(mes, ano),
     ])
 
+    const contratosNaoGerados = contratos.filter((c) => !c.jaGerado).length
     const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
                    'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 
     return reply.view('pagamentos/index', {
       title: 'Pagamentos', activePage: '/pagamentos',
-      pagamentos, resumo, contratos,
+      pagamentos, resumo, contratos, contratosNaoGerados,
       mes, ano, mesLabel: meses[mes - 1],
+      hoje: new Date(),
       filtroStatus: q.status || '',
       flash: q.flash, flashMsg: q.msg,
     })

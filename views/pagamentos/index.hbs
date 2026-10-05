@@ -1,6 +1,6 @@
 <div class="space-y-4" x-data="pagamentosPage()">
 
-  <!-- Filtros de período e status -->
+  <!-- Filtros -->
   <div class="card">
     <form method="GET" action="/pagamentos" class="flex flex-wrap items-end gap-3">
       <div class="form-group">
@@ -39,107 +39,151 @@
     </form>
   </div>
 
-  <!-- Resumo do mês -->
+  <!-- Resumo -->
   <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
     <div class="metric-card">
       <p class="metric-label">Previsto</p>
-      <p class="metric-value text-gray-700 mt-1" style="font-size:1.1rem">{{currency resumo.totalPrevisto}}</p>
+      <p class="text-base font-bold text-gray-700 mt-1">{{currency resumo.totalPrevisto}}</p>
     </div>
     <div class="metric-card">
       <p class="metric-label">Recebido</p>
-      <p class="metric-value text-green-600 mt-1" style="font-size:1.1rem">{{currency resumo.totalRecebido}}</p>
+      <p class="text-base font-bold text-green-600 mt-1">{{currency resumo.totalRecebido}}</p>
     </div>
     <div class="metric-card">
       <p class="metric-label">Pagos</p>
-      <p class="metric-value mt-1" style="font-size:1.1rem">{{resumo.qtdPago}}</p>
+      <p class="text-base font-bold mt-1">{{resumo.qtdPago}}</p>
     </div>
     <div class="metric-card">
       <p class="metric-label">Pendentes</p>
-      <p class="metric-value mt-1 {{#if resumo.qtdPendente}}text-amber-500{{else}}text-gray-400{{/if}}" style="font-size:1.1rem">{{resumo.qtdPendente}}</p>
+      <p class="text-base font-bold mt-1 {{#if resumo.qtdPendente}}text-amber-500{{else}}text-gray-400{{/if}}">{{resumo.qtdPendente}}</p>
     </div>
     <div class="metric-card">
       <p class="metric-label">Atrasados</p>
-      <p class="metric-value mt-1 {{#if resumo.qtdAtrasado}}text-red-500{{else}}text-gray-400{{/if}}" style="font-size:1.1rem">{{resumo.qtdAtrasado}}</p>
+      <p class="text-base font-bold mt-1 {{#if resumo.qtdAtrasado}}text-red-500{{else}}text-gray-400{{/if}}">{{resumo.qtdAtrasado}}</p>
     </div>
   </div>
 
-  <!-- Gerar cobranças ou lista -->
-  {{#if resumo.gerado}}
+  <!-- Bloco de geração (aparece sempre que há contratos sem cobrança) -->
+  {{#unless (eq contratosNaoGerados 0)}}
+  <div class="card border-2 border-dashed border-amber-300 bg-amber-50">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <p class="text-amber-700 font-semibold">{{contratosNaoGerados}} contrato(s) sem cobrança em {{mesLabel}}/{{ano}}</p>
+        <p class="text-amber-600 text-sm mt-0.5">Selecione quais deseja gerar agora</p>
+      </div>
+    </div>
 
-  <!-- Lista de pagamentos do mês -->
+    <form method="POST" action="/pagamentos/gerar">
+      <input type="hidden" name="mes" value="{{this.mes}}">
+      <input type="hidden" name="ano" value="{{this.ano}}">
+
+      <div class="flex items-center gap-3 mb-3">
+        <button type="button" @click="selecionarTodos()" class="btn btn-secondary btn-sm">Selecionar todos</button>
+        <button type="button" @click="deselecionarTodos()" class="btn btn-secondary btn-sm">Desmarcar todos</button>
+        <span class="text-sm text-gray-500" x-text="selecionados + ' selecionado(s)'"></span>
+      </div>
+
+      <div class="divide-y divide-amber-100 mb-4 bg-white rounded-lg border border-amber-200 overflow-hidden">
+        {{#each contratos}}
+        {{#unless jaGerado}}
+        <label class="flex items-center gap-3 py-3 px-4 cursor-pointer hover:bg-amber-50 transition-colors">
+          <input type="checkbox" name="contrato_ids" value="{{id}}"
+            checked
+            @change="contarSelecionados()"
+            class="w-4 h-4 text-brand-600 rounded">
+          <div class="flex-1">
+            <p class="font-medium text-gray-800">{{inquilino.nome}}</p>
+            <p class="text-sm text-gray-500">{{unidade.identificacao}} — {{unidade.imovel.nome}} · Venc. dia {{unidade.dia_vencimento}}</p>
+          </div>
+          <span class="text-sm font-medium text-gray-700">{{currency valor_aluguel}}</span>
+        </label>
+        {{/unless}}
+        {{/each}}
+      </div>
+
+      <div class="flex justify-end">
+        <button type="submit" class="btn btn-primary"
+          onclick="return confirm('Gerar cobranças para os contratos selecionados?')">
+          Gerar cobranças selecionadas
+        </button>
+      </div>
+    </form>
+  </div>
+  {{/unless}}
+
+  <!-- Lista de pagamentos já gerados -->
+  {{#if pagamentos.length}}
   <div class="card">
     <div class="card-header">
       <h2 class="card-title">{{mesLabel}}/{{ano}}</h2>
-      <span class="text-sm text-gray-400">{{resumo.total}} cobrança(s)</span>
+      <span class="text-sm text-gray-400">{{resumo.total}} cobrança(s) gerada(s)</span>
     </div>
 
-    {{#if pagamentos.length}}
-    <div class="divide-y divide-gray-100">
+    <div class="divide-y divide-gray-100" id="lista-pagamentos">
       {{#each pagamentos}}
-      <div class="py-3" x-data="{baixaAberta: false, editAberta: false, copiando: false}">
+      <div class="py-3" id="pag-{{id}}">
         <div class="flex items-center gap-3 flex-wrap">
 
-          <!-- Info principal -->
+          <!-- Info -->
           <div class="flex-1 min-w-0">
             <p class="font-medium text-gray-900 truncate">{{contrato.inquilino.nome}}</p>
             <p class="text-sm text-gray-500 truncate">{{contrato.unidade.identificacao}} — {{contrato.unidade.imovel.nome}}</p>
+            {{#if saldo_incorporado}}
             {{#if (neq saldo_incorporado 0)}}
             <p class="text-xs text-amber-600 mt-0.5">⚠ Inclui saldo anterior: {{currency saldo_incorporado}}</p>
             {{/if}}
+            {{/if}}
           </div>
 
-          <!-- Valor e vencimento -->
+          <!-- Valor -->
           <div class="text-right shrink-0">
-            <p class="font-semibold text-gray-800">{{currency valor_previsto}}{{#if (neq saldo_incorporado 0)}} + {{currency saldo_incorporado}}{{/if}}</p>
+            <p class="font-semibold text-gray-800">{{currency valor_previsto}}</p>
             <p class="text-xs text-gray-400">Venc. {{date data_vencimento}}</p>
+            {{#if (eq status 'parcial')}}
+            <p class="text-xs text-blue-600">Pago: {{currency valor_pago}}</p>
+            {{/if}}
           </div>
 
-          <!-- Badge de status -->
-          <div class="shrink-0">
+          <!-- Status -->
+          <div class="shrink-0 text-right">
             <span class="badge {{statusClass status}}">{{statusLabel status}}</span>
-            {{#if (eq status 'parcial')}}
-            <p class="text-xs text-blue-600 mt-0.5">Pago: {{currency valor_pago}}</p>
+            {{#if (eq status 'pago')}}
+            <p class="text-xs text-green-600 mt-0.5">{{date data_pagamento}}</p>
             {{/if}}
           </div>
 
           <!-- Ações -->
-          <div class="flex gap-2 shrink-0">
-            {{#if (eq status 'pago')}}
-              <span class="text-sm text-green-600 font-medium">✓ {{date data_pagamento}}</span>
-            {{else if (eq status 'isento')}}
-              <span class="text-sm text-gray-400">Isento</span>
-            {{else}}
-              <button type="button" @click="baixaAberta = !baixaAberta; editAberta = false"
-                class="btn btn-primary btn-sm">
-                <span x-text="baixaAberta ? 'Cancelar' : 'Dar baixa'"></span>
-              </button>
-            {{/if}}
-
-            {{#if (neq status 'pago')}}
-            {{#if (neq status 'isento')}}
+          <div class="flex gap-2 shrink-0 flex-wrap">
+            {{#unless (eq status 'pago')}}
+            {{#unless (eq status 'isento')}}
             <button type="button"
-              @click="copiarCobranca({{id}}, $el)"
+              onclick="toggleBaixa({{id}})"
+              class="btn btn-primary btn-sm"
+              id="btn-baixa-{{id}}">
+              Dar baixa
+            </button>
+            <button type="button"
+              id="btn-cob-{{id}}"
+              onclick="copiarCobranca({{id}})"
+              class="btn btn-secondary btn-sm">
+              📋 Cobrança
+            </button>
+            {{/unless}}
+            {{/unless}}
+            <button type="button"
+              onclick="toggleEdit({{id}})"
               class="btn btn-secondary btn-sm"
-              title="Copiar mensagem de cobrança">
-              <span x-text="copiando ? '✓ Copiado!' : '📋 Cobrança'"></span>
-            </button>
-            {{/if}}
-            {{/if}}
-
-            <button type="button" @click="editAberta = !editAberta; baixaAberta = false"
-              class="btn btn-secondary btn-sm" title="Editar manualmente">
-              ⚙
-            </button>
+              title="Editar">⚙</button>
           </div>
         </div>
 
-        <!-- Formulário dar baixa inline -->
-        <div x-show="baixaAberta" x-transition class="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+        <!-- Formulário dar baixa -->
+        <div id="baixa-{{id}}" style="display:none" class="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
           <form method="POST" action="/pagamentos/{{id}}/registrar" class="flex flex-wrap gap-3 items-end">
             <div class="form-group">
               <label class="form-label text-xs">Valor recebido (R$)</label>
               <input class="form-input" type="number" name="valor_pago"
-                value="{{number valor_previsto}}" step="0.01" min="0.01"
+                value="{{valor_previsto}}" step="0.01" min="0.01"
                 style="width:140px" required>
             </div>
             <div class="form-group">
@@ -151,12 +195,13 @@
               <label class="form-label text-xs">Observações</label>
               <input class="form-input" type="text" name="observacoes" placeholder="Opcional">
             </div>
-            <button type="submit" class="btn btn-primary btn-sm">✓ Confirmar recebimento</button>
+            <button type="submit" class="btn btn-primary btn-sm">✓ Confirmar</button>
+            <button type="button" onclick="toggleBaixa({{id}})" class="btn btn-secondary btn-sm">Cancelar</button>
           </form>
         </div>
 
-        <!-- Formulário edição manual inline -->
-        <div x-show="editAberta" x-transition class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+        <!-- Formulário edição -->
+        <div id="edit-{{id}}" style="display:none" class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
           <form method="POST" action="/pagamentos/{{id}}/editar" class="flex flex-wrap gap-3 items-end">
             <div class="form-group">
               <label class="form-label text-xs">Status</label>
@@ -181,67 +226,21 @@
               <input class="form-input" type="text" name="observacoes" value="{{observacoes}}">
             </div>
             <button type="submit" class="btn btn-secondary btn-sm">Salvar</button>
+            <button type="button" onclick="toggleEdit({{id}})" class="btn btn-secondary btn-sm">Cancelar</button>
           </form>
         </div>
       </div>
       {{/each}}
     </div>
-    {{else}}
-    <div class="empty-state"><p>Nenhum pagamento encontrado com este filtro.</p></div>
-    {{/if}}
   </div>
-
   {{else}}
-
-  <!-- Estado: cobranças não geradas -->
-  <div class="card border-2 border-dashed border-amber-300 bg-amber-50">
-    <div class="text-center py-4 mb-4">
-      <p class="text-amber-700 font-semibold text-lg">Cobranças de {{mesLabel}}/{{ano}} não foram geradas</p>
-      <p class="text-amber-600 text-sm mt-1">Selecione os contratos e clique em gerar</p>
+  {{#if (eq contratosNaoGerados 0)}}
+  <div class="card">
+    <div class="empty-state">
+      <p>Nenhum pagamento para este período.</p>
     </div>
-
-    <form method="POST" action="/pagamentos/gerar">
-      <input type="hidden" name="mes" value="{{mes}}">
-      <input type="hidden" name="ano" value="{{ano}}">
-
-      <div class="mb-4 flex items-center gap-3">
-        <button type="button" @click="selecionarTodos()" class="btn btn-secondary btn-sm">Selecionar todos</button>
-        <button type="button" @click="deselecionarTodos()" class="btn btn-secondary btn-sm">Desmarcar todos</button>
-        <span class="text-sm text-gray-500" x-text="selecionados + ' de {{contratos.length}} selecionados'"></span>
-      </div>
-
-      <div class="divide-y divide-gray-100 mb-4">
-        {{#each contratos}}
-        <label class="flex items-center gap-3 py-3 cursor-pointer hover:bg-white rounded-lg px-2 transition-colors">
-          <input type="checkbox" name="contrato_ids" value="{{id}}"
-            {{#unless jaGerado}}checked{{/unless}}
-            {{#if jaGerado}}disabled{{/if}}
-            @change="contarSelecionados()"
-            class="w-4 h-4 text-brand-600 rounded">
-          <div class="flex-1">
-            <p class="font-medium text-gray-800">{{inquilino.nome}}</p>
-            <p class="text-sm text-gray-500">{{unidade.identificacao}} — {{unidade.imovel.nome}} · Venc. dia {{../contrato.dia_vencimento}}</p>
-          </div>
-          <div class="text-right">
-            {{#if jaGerado}}
-            <span class="badge badge-neutral text-xs">Já gerado</span>
-            {{else}}
-            <span class="text-sm font-medium text-gray-700">{{currency valor_aluguel}}</span>
-            {{/if}}
-          </div>
-        </label>
-        {{/each}}
-      </div>
-
-      <div class="flex justify-end">
-        <button type="submit" class="btn btn-primary"
-          onclick="return confirm('Gerar cobranças para os contratos selecionados?')">
-          Gerar cobranças selecionadas
-        </button>
-      </div>
-    </form>
   </div>
-
+  {{/if}}
   {{/if}}
 
 </div>
@@ -252,31 +251,56 @@ function pagamentosPage() {
     selecionados: 0,
     init() { this.contarSelecionados() },
     contarSelecionados() {
-      this.selecionados = document.querySelectorAll('input[name="contrato_ids"]:checked:not(:disabled)').length
+      this.selecionados = document.querySelectorAll('input[name="contrato_ids"]:checked').length
     },
     selecionarTodos() {
-      document.querySelectorAll('input[name="contrato_ids"]:not(:disabled)').forEach(el => el.checked = true)
+      document.querySelectorAll('input[name="contrato_ids"]').forEach(el => el.checked = true)
       this.contarSelecionados()
     },
     deselecionarTodos() {
-      document.querySelectorAll('input[name="contrato_ids"]:not(:disabled)').forEach(el => el.checked = false)
+      document.querySelectorAll('input[name="contrato_ids"]').forEach(el => el.checked = false)
       this.contarSelecionados()
     },
   }
 }
 
-async function copiarCobranca(id, btn) {
-  const comp = btn.closest('[x-data]').__x.$data
-  comp.copiando = true
+function toggleBaixa(id) {
+  const el = document.getElementById('baixa-' + id)
+  const editEl = document.getElementById('edit-' + id)
+  if (editEl) editEl.style.display = 'none'
+  el.style.display = el.style.display === 'none' ? 'block' : 'none'
+}
+
+function toggleEdit(id) {
+  const el = document.getElementById('edit-' + id)
+  const baixaEl = document.getElementById('baixa-' + id)
+  if (baixaEl) baixaEl.style.display = 'none'
+  el.style.display = el.style.display === 'none' ? 'block' : 'none'
+}
+
+async function copiarCobranca(id) {
+  const btn = document.getElementById('btn-cob-' + id)
+  const textoOriginal = btn.textContent
+  btn.textContent = 'Gerando...'
+  btn.disabled = true
   try {
-    const res = await fetch(`/pagamentos/${id}/mensagem`)
+    const res = await fetch('/pagamentos/' + id + '/mensagem')
     const data = await res.json()
     if (data.mensagem) {
       await navigator.clipboard.writeText(data.mensagem)
+      btn.textContent = '✓ Copiado!'
+      btn.style.color = 'green'
+    } else {
+      btn.textContent = 'Erro'
     }
   } catch(e) {
-    alert('Erro ao gerar mensagem.')
+    btn.textContent = 'Erro'
+    console.error(e)
   }
-  setTimeout(() => { comp.copiando = false }, 2500)
+  setTimeout(() => {
+    btn.textContent = textoOriginal
+    btn.style.color = ''
+    btn.disabled = false
+  }, 2500)
 }
 </script>

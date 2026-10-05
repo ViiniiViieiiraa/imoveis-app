@@ -42,14 +42,20 @@ export async function getPagamento(id: number) {
   return p
 }
 
-// Retorna contratos ativos com info se já têm cobrança gerada para o mês/ano
+// Retorna contratos ativos, separando os que já têm cobrança dos que não têm
 export async function getContratosParaGeracao(mes: number, ano: number) {
   const contratos = await prisma.contrato.findMany({
     where: { status: 'ativo' },
     orderBy: [{ unidade: { imovel: { nome: 'asc' } } }],
     include: {
       inquilino: { select: { nome: true } },
-      unidade: { select: { identificacao: true, imovel: { select: { nome: true } } } },
+      unidade: {
+        select: {
+          identificacao: true,
+          dia_vencimento: true,
+          imovel: { select: { nome: true } },
+        },
+      },
       pagamentos: {
         where: { mes_referencia: mes, ano_referencia: ano },
         take: 1,
@@ -60,17 +66,30 @@ export async function getContratosParaGeracao(mes: number, ano: number) {
   return contratos.map((c) => ({
     ...c,
     jaGerado: c.pagamentos.length > 0,
-    saldoDevedor: 0, // calculado abaixo
   }))
 }
 
-async function getSaldoDevedor(contratoId: number): Promise<number> {
-  // Soma todos os saldos de pagamentos parciais não quitados
+// Calcula saldo devedor ANTERIOR a um determinado mês/ano
+async function getSaldoDevedorAnterior(
+  contratoId: number,
+  mesAtual: number,
+  anoAtual: number,
+): Promise<number> {
   const parciais = await prisma.pagamento.findMany({
-    where: { contrato_id: contratoId, status: 'parcial' },
+    where: {
+      contrato_id: contratoId,
+      status: 'parcial',
+      OR: [
+        { ano_referencia: { lt: anoAtual } },
+        { ano_referencia: anoAtual, mes_referencia: { lt: mesAtual } },
+      ],
+    },
   })
+
+  // Para cada parcial anterior, calcula quanto ainda falta
   return parciais.reduce((acc: number, p) => {
-    const falta = Number(p.valor_previsto) + Number(p.saldo_incorporado) - Number(p.valor_pago ?? 0)
+    const totalDevido = Number(p.valor_previsto) + Number(p.saldo_incorporado)
+    const falta = totalDevido - Number(p.valor_pago ?? 0)
     return acc + Math.max(0, falta)
   }, 0)
 }
@@ -98,9 +117,8 @@ export async function gerarCobrancasMes(data: GerarCobrancasInput, contratoIds: 
 
     if (existe) { ignorados++; continue }
 
-    const saldoAnterior = await getSaldoDevedor(c.id)
-    const diaVenc = c.dia_vencimento
-    const dataVencimento = new Date(data.ano, data.mes - 1, diaVenc)
+    const saldoAnterior = await getSaldoDevedorAnterior(c.id, data.mes, data.ano)
+    const dataVencimento = new Date(data.ano, data.mes - 1, c.dia_vencimento)
 
     await prisma.pagamento.create({
       data: {
@@ -141,7 +159,7 @@ export async function registrarPagamento(id: number, data: RegistrarPagamentoInp
       status: isParcial ? 'parcial' : 'pago',
       observacoes: isParcial
         ? `Pagamento parcial. Faltam ${formatCurrency(totalDevido - valorPago)}.${data.observacoes ? ' ' + data.observacoes : ''}`
-        : data.observacoes || pagamento.observacoes,
+        : (data.observacoes || pagamento.observacoes),
     },
   })
 }
@@ -183,7 +201,7 @@ export async function gerarMensagemCobranca(pagamentoId: number): Promise<string
     : ''
 
   const valorFinal = p.status === 'parcial'
-    ? formatCurrency(saldoDevedor)
+    ? formatCurrency(Math.max(0, saldoDevedor))
     : formatCurrency(totalDevido)
 
   return template

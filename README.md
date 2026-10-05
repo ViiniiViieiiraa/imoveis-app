@@ -93,15 +93,15 @@ imoveis-app/
 
 ## Banco de dados
 
-O banco SQLite fica em `data/imoveis.db` (pasta `data/` na raiz do projeto). Para visualizar os dados diretamente:
+O banco SQLite fica em `data/imoveis_demo.db` (pasta `data/` na raiz do projeto). Para visualizar os dados diretamente:
 
 ```
 npx prisma studio
 ```
 
-Para fazer backup, basta copiar o arquivo `data/imoveis.db`.
+Para fazer backup, basta copiar o arquivo `data/imoveis_demo.db`.
 
-> **Nota técnica:** o `DATABASE_URL` no `.env` usa `file:../data/imoveis.db` — o caminho é relativo à pasta `prisma/`, não à raiz do projeto. Isso garante que tanto o CLI do Prisma quanto o runtime do Node encontrem o arquivo no mesmo lugar (`data/` na raiz).
+> **Nota técnica:** o `DATABASE_URL` no `.env` usa `file:../data/imoveis_demo.db` — o caminho é relativo à pasta `prisma/`, não à raiz do projeto. Isso garante que tanto o CLI do Prisma quanto o runtime do Node encontrem o arquivo no mesmo lugar (`data/` na raiz).
 
 ---
 
